@@ -5,6 +5,8 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import * as schema from "@shared/schema";
 import { sql } from "drizzle-orm";
+import 'dotenv/config';
+console.log("Connecting to database with URL:", process.env.DATABASE_URL);
 
 const app = express();
 app.use(express.json());
@@ -46,6 +48,15 @@ app.use((req, res, next) => {
   const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
   });
+
+  // Test database connection
+  try {
+    await pool.query("SELECT 1");
+    log("Database connection successful");
+  } catch (error) {
+    log("Database connection failed:", error);
+    process.exit(1);
+  }
 
   const db = drizzle(pool, { schema });
 
@@ -136,12 +147,8 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
+  const port = 3000;
+  server.listen(port, () => {
+    log(`Server running at http://localhost:${port}`);
   });
 })();
